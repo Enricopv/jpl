@@ -4,14 +4,14 @@ import { useSpring, animated } from 'react-spring';
 const IMAGE_HEIGHT = 955;
 const IMAGE_WIDTH = 4683;
 const imageRatio = IMAGE_WIDTH / IMAGE_HEIGHT;
-const BROWSER_WIDTH = window.innerWidth;
-const BROWSER_HEIGHT = window.innerHeight;
 
 export function Index() {
   const [clickLocation, setClickLocation] = React.useState<{
     clickX: number;
     clickY: number;
   }>();
+  const BROWSER_WIDTH = process.browser && window.innerWidth;
+  const BROWSER_HEIGHT = process.browser && window.innerHeight;
 
   const onClick = (e: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
     console.log('e', e.pageX);
@@ -42,16 +42,12 @@ export function Index() {
           />
         )}
       </div>
-      <pre>
-        <div>BROWSER_WIDTH: {BROWSER_WIDTH}</div>
-        <div>BROWSER_HEIGHT: {BROWSER_HEIGHT}</div>
-        <div>clickLocation: {JSON.stringify(clickLocation, null, 1)}</div>
-      </pre>
     </div>
   );
 }
 
 const FLAG_HEIGHT = 80;
+const FLAG_WIDTH = 200;
 const MapPin = (props: {
   location: {
     x: number;
@@ -60,18 +56,21 @@ const MapPin = (props: {
 }) => {
   const [flagHeight, setFlagHeight] = React.useState(0);
   const [flagWidth, setFlagWidth] = React.useState(0);
+  const [delay, setDelay] = React.useState(500);
 
   const styleProps = useSpring({ height: flagHeight });
   const flagWidthStyle = useSpring({
     width: flagWidth,
     minWidth: flagWidth,
-    delay: 500,
+    delay,
   });
 
   React.useEffect(() => {
     if (flagHeight === FLAG_HEIGHT) {
-      setFlagWidth(200);
+      setDelay(500);
+      setFlagWidth(FLAG_WIDTH);
     } else {
+      setDelay(0);
       setFlagWidth(0);
     }
   }, [flagHeight]);
@@ -100,16 +99,24 @@ const MapPin = (props: {
       <animated.div
         style={{
           ...styleProps,
-          backgroundColor: 'red',
           width: 3,
           transform: `translate(-50%, -50%)`,
+          background: 'linear-gradient(#3ED6CA, #B7E1DD)',
+          // background: 'linear-gradient(yellow, green)',
         }}
       >
         <animated.div
-          style={{ ...flagWidthStyle, height: 50, overflow: 'hidden' }}
+          style={{ ...flagWidthStyle, overflow: 'hidden', paddingLeft: 4 }}
         >
-          <div>Hey Jon</div>
-          <div>You handsome devil</div>
+          <div style={{ width: FLAG_WIDTH }}>
+            <div style={{ color: '#3ED6CA', fontWeight: 'bold' }}>Whoa bro</div>
+            <div style={{}}>
+              <span style={{ fontWeight: 'bold', marginRight: 4 }}>
+                March 24, 1988
+              </span>{' '}
+              something totally gnar happened.
+            </div>
+          </div>
         </animated.div>
       </animated.div>
     </div>
