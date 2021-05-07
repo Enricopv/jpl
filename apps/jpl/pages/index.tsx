@@ -1,99 +1,119 @@
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
+import { useSpring, animated } from 'react-spring';
 
-import styles from './index.module.css';
+const IMAGE_HEIGHT = 955;
+const IMAGE_WIDTH = 4683;
+const imageRatio = IMAGE_WIDTH / IMAGE_HEIGHT;
+const BROWSER_WIDTH = window.innerWidth;
+const BROWSER_HEIGHT = window.innerHeight;
 
 export function Index() {
-  /*
-   * Replace the elements below with your own.
-   *
-   * Note: The corresponding styles are in the ./index.css file.
-   */
+  const [clickLocation, setClickLocation] = React.useState<{
+    clickX: number;
+    clickY: number;
+  }>();
+
+  const onClick = (e: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
+    console.log('e', e.pageX);
+    setClickLocation({
+      clickX: (e.pageX / BROWSER_WIDTH) * 100,
+      clickY: (e.pageY / BROWSER_HEIGHT) * 100,
+    });
+  };
+
   return (
-    <div className={styles.page}>
-      <h2>Resources &amp; Tools</h2>
-      <p>Thank you for using and showing some ♥ for Nx.</p>
-      <div className="flex github-star-container">
-        <a
-          href="https://github.com/nrwl/nx"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {' '}
-          If you like Nx, please give it a star:
-          <div className="github-star-badge">
-            <img src="/star.svg" className="material-icons" alt="" />
-            Star
-          </div>
-        </a>
+    <div>
+      <div>
+        <img
+          onMouseDown={onClick}
+          src="/oil_map.png"
+          style={{
+            width: '100%',
+            height: 'auto',
+            boxShadow: '2px 2px 15px rgba(0,0,0,0.3)',
+            zIndex: 0,
+            opacity: 0.2,
+          }}
+          alt="oil map"
+        />
+        {clickLocation && (
+          <MapPin
+            location={{ x: clickLocation.clickX, y: clickLocation.clickY }}
+          />
+        )}
       </div>
-      <p>Here are some links to help you get started.</p>
-      <ul className="resources">
-        <li className="col-span-2">
-          <a
-            className="resource flex"
-            href="https://egghead.io/playlists/scale-react-development-with-nx-4038"
-          >
-            Scale React Development with Nx (Course)
-          </a>
-        </li>
-        <li className="col-span-2">
-          <a
-            className="resource flex"
-            href="https://nx.dev/latest/react/tutorial/01-create-application"
-          >
-            Interactive tutorial
-          </a>
-        </li>
-        <li className="col-span-2">
-          <a className="resource flex" href="https://nx.app/">
-            <svg
-              width="36"
-              height="36"
-              viewBox="0 0 120 120"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M120 15V30C103.44 30 90 43.44 90 60C90 76.56 76.56 90 60 90C43.44 90 30 103.44 30 120H15C6.72 120 0 113.28 0 105V15C0 6.72 6.72 0 15 0H105C113.28 0 120 6.72 120 15Z"
-                fill="#0E2039"
-              />
-              <path
-                d="M120 30V105C120 113.28 113.28 120 105 120H30C30 103.44 43.44 90 60 90C76.56 90 90 76.56 90 60C90 43.44 103.44 30 120 30Z"
-                fill="white"
-              />
-            </svg>
-            <span className="gutter-left">Nx Cloud</span>
-          </a>
-        </li>
-      </ul>
-      <h2>Next Steps</h2>
-      <p>Here are some things you can do with Nx.</p>
-      <details open>
-        <summary>Add UI library</summary>
-        <pre>{`# Generate UI lib
-nx g @nrwl/react:lib ui
-
-# Add a component
-nx g @nrwl/react:component xyz --project ui`}</pre>
-      </details>
-      <details>
-        <summary>View dependency graph</summary>
-        <pre>{`nx dep-graph`}</pre>
-      </details>
-      <details>
-        <summary>Run affected commands</summary>
-        <pre>{`# see what's been affected by changes
-nx affected:dep-graph
-
-# run tests for current changes
-nx affected:test
-
-# run e2e tests for current changes
-nx affected:e2e
-`}</pre>
-      </details>
+      <pre>
+        <div>BROWSER_WIDTH: {BROWSER_WIDTH}</div>
+        <div>BROWSER_HEIGHT: {BROWSER_HEIGHT}</div>
+        <div>clickLocation: {JSON.stringify(clickLocation, null, 1)}</div>
+      </pre>
     </div>
   );
 }
+
+const FLAG_HEIGHT = 80;
+const MapPin = (props: {
+  location: {
+    x: number;
+    y: number;
+  };
+}) => {
+  const [flagHeight, setFlagHeight] = React.useState(0);
+  const [flagWidth, setFlagWidth] = React.useState(0);
+
+  const styleProps = useSpring({ height: flagHeight });
+  const flagWidthStyle = useSpring({
+    width: flagWidth,
+    minWidth: flagWidth,
+    delay: 500,
+  });
+
+  React.useEffect(() => {
+    if (flagHeight === FLAG_HEIGHT) {
+      setFlagWidth(200);
+    } else {
+      setFlagWidth(0);
+    }
+  }, [flagHeight]);
+
+  return (
+    <div
+      onClick={() => {
+        setFlagHeight(flagHeight === FLAG_HEIGHT ? 0 : FLAG_HEIGHT);
+      }}
+      style={{
+        width: 20,
+        height: 20,
+        backgroundColor: 'dodgerblue',
+        borderRadius: 10,
+        transform: `translate(-50%, -50%)`,
+        position: 'absolute',
+        left: `${props.location.x}%`,
+        top: `${props.location.y}%`,
+        zIndex: 4,
+        cursor: 'pointer',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <animated.div
+        style={{
+          ...styleProps,
+          backgroundColor: 'red',
+          width: 3,
+          transform: `translate(-50%, -50%)`,
+        }}
+      >
+        <animated.div
+          style={{ ...flagWidthStyle, height: 50, overflow: 'hidden' }}
+        >
+          <div>Hey Jon</div>
+          <div>You handsome devil</div>
+        </animated.div>
+      </animated.div>
+    </div>
+  );
+};
 
 export default Index;
